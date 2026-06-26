@@ -17,7 +17,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        'opd_id', // Tambahkan jika perlu
+        'opd_id',  // <-- PASTIKAN INI ADA
+        'is_active',
     ];
 
     protected $hidden = [
@@ -30,16 +31,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
-    // Relasi ke Role
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
-    // Relasi ke OPD (untuk admin_opd)
     public function opd(): BelongsTo
     {
         return $this->belongsTo(OPD::class, 'opd_id');

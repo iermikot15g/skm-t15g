@@ -16,15 +16,24 @@
                 {{ auth()->user()->role->display_name }}
             </span>
         </p>
-        <div class="mt-3 flex flex-wrap gap-2">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                {{ auth()->user()->role->name }}
-            </span>
-        </div>
+        @if($stats['active_periode'])
+            <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-700">
+                    ✅ Periode Survei Aktif: <strong>{{ $stats['active_periode']->nama_periode }}</strong>
+                    ({{ $stats['active_periode']->tanggal_mulai->format('d/m/Y') }} - {{ $stats['active_periode']->tanggal_selesai->format('d/m/Y') }})
+                </p>
+            </div>
+        @else
+            <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-yellow-700">
+                    ⚠️ Tidak ada periode survei aktif. Silakan buat periode survei baru.
+                </p>
+            </div>
+        @endif
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="p-3 bg-blue-100 rounded-full">
@@ -34,7 +43,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm text-gray-500">Total Users</p>
-                    <p class="text-2xl font-semibold text-gray-800">{{ $totalUsers ?? 0 }}</p>
+                    <p class="text-2xl font-semibold text-gray-800">{{ $stats['total_users'] }}</p>
                 </div>
             </div>
         </div>
@@ -48,7 +57,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm text-gray-500">Total OPD</p>
-                    <p class="text-2xl font-semibold text-gray-800">{{ $totalOPD ?? 0 }}</p>
+                    <p class="text-2xl font-semibold text-gray-800">{{ $stats['total_opd'] }}</p>
                 </div>
             </div>
         </div>
@@ -62,23 +71,54 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm text-gray-500">Total Layanan</p>
-                    <p class="text-2xl font-semibold text-gray-800">{{ $totalLayanan ?? 0 }}</p>
+                    <p class="text-2xl font-semibold text-gray-800">{{ $stats['total_layanan'] }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 bg-purple-100 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500">Total Survei</p>
+                    <p class="text-2xl font-semibold text-gray-800">{{ $stats['total_survei'] }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Info for different roles -->
+    <!-- Quick Actions -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Role</h3>
-        <div class="space-y-2">
-            <p><span class="font-medium">Role Anda:</span> {{ auth()->user()->role->display_name }}</p>
-            <p><span class="font-medium">Deskripsi:</span> {{ auth()->user()->role->description }}</p>
-            @if(auth()->user()->isSuperAdmin())
-                <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p class="text-sm text-blue-700">✅ Anda memiliki akses penuh sebagai Super Administrator.</p>
-                </div>
-            @endif
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="#" class="p-4 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
+                <svg class="w-8 h-8 mx-auto text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-700">Tambah OPD</span>
+            </a>
+            <a href="#" class="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors">
+                <svg class="w-8 h-8 mx-auto text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-700">Tambah Layanan</span>
+            </a>
+            <a href="#" class="p-4 bg-yellow-50 rounded-lg text-center hover:bg-yellow-100 transition-colors">
+                <svg class="w-8 h-8 mx-auto text-yellow-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-700">Buat Periode</span>
+            </a>
+            <a href="#" class="p-4 bg-purple-50 rounded-lg text-center hover:bg-purple-100 transition-colors">
+                <svg class="w-8 h-8 mx-auto text-purple-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-700">Tambah User</span>
+            </a>
         </div>
     </div>
 </div>
