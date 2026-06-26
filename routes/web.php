@@ -3,6 +3,8 @@
 
 use App\Http\Controllers\Public\SurveyController;
 use App\Http\Controllers\Admin\DashboardController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 // ============================================
 // PUBLIC ROUTES
@@ -16,9 +18,16 @@ Route::prefix('survei')->name('survey.')->group(function () {
         Route::get('/opd', [SurveyController::class, 'selectOPD'])->name('opd');
         Route::post('/identity', [SurveyController::class, 'identity'])->name('identity');
         Route::post('/store-identity', [SurveyController::class, 'storeIdentity'])->name('store-identity');
-        Route::get('/questions', function () {
-            return view('public.survey.questions-placeholder');
-        })->name('questions');
+        
+        // FASE 3: Questions & Kritik Saran
+        Route::get('/questions', [SurveyController::class, 'questions'])->name('questions');
+        Route::post('/store-questions', [SurveyController::class, 'storeQuestions'])->name('store-questions');
+        Route::get('/kritik-saran', [SurveyController::class, 'kritikSaran'])->name('kritik-saran');
+        Route::post('/store-kritik-saran', [SurveyController::class, 'storeKritikSaran'])->name('store-kritik-saran');
+        
+        // FASE 3: Review & Submit
+        Route::get('/review', [SurveyController::class, 'review'])->name('review');
+        Route::post('/submit', [SurveyController::class, 'submit'])->name('submit');
     });
 });
 

@@ -13,7 +13,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SuperAdminSeeder::class,
             OPDSeeder::class,
-            PeriodeSurveiSeeder::class, // Tambahkan
+            PeriodeSurveiSeeder::class,
+            UnsurSurveiSeeder::class, // <-- TAMBAHKAN INI
         ]);
     }
 }
