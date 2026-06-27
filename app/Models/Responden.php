@@ -23,6 +23,6 @@ class Responden extends Model
 
     public function surveiResponses(): HasMany
     {
-        return $this->hasMany(SurveiResponse::class);
+        return $this->hasMany(SurveiResponse::class, 'responden_id');
     }
 }

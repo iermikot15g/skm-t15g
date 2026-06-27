@@ -9,24 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  ...$roles
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        // Cek apakah user sudah login
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
         $user = Auth::user();
         
-        // Cek apakah user punya role
         if (!$user->role) {
             abort(403, 'User tidak memiliki role.');
         }

@@ -28,7 +28,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect based on role
+        $user = auth()->user();
+        
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isAdminOPD() || $user->isPimpinanOPD()) {
+            return redirect()->route('admin.opd.dashboard');
+        } elseif ($user->isPimpinanUtama()) {
+            return redirect()->route('admin.utama.dashboard'); // Future
+        }
+
+        // Default fallback
+        return redirect()->intended('/dashboard');
     }
 
     /**

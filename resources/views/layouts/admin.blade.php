@@ -38,71 +38,140 @@
             
             <nav class="mt-6 px-4 pb-6">
                 <div class="space-y-1">
-                    <!-- Dashboard -->
-                    <a href="{{ route('admin.dashboard') }}" 
-                       class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                        </svg>
-                        Dashboard
-                    </a>
                     
-                    @if(auth()->user()?->isSuperAdmin())
-                    <!-- Menu Super Admin -->
-                    <div class="pt-4 mt-4 border-t border-gray-200">
-                        <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Master Data</p>
-                        
-                        <a href="{{ route('admin.opd.index') }}" 
-                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.opd.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                    <!-- ========================================== -->
+                    <!-- ROLE CHECK -->
+                    <!-- ========================================== -->
+                    @php
+                        $user = auth()->user();
+                        $isSuperAdmin = $user?->isSuperAdmin();
+                        $isAdminOPD = $user?->isAdminOPD();
+                        $isPimpinanOPD = $user?->isPimpinanOPD();
+                        $isPimpinanUtama = $user?->isPimpinanUtama();
+                    @endphp
+
+                    <!-- ========================================== -->
+                    <!-- DASHBOARD SUPER ADMIN -->
+                    <!-- ========================================== -->
+                    @if($isSuperAdmin)
+                        <a href="{{ route('admin.dashboard') }}" 
+                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                             </svg>
-                            OPD
+                            Dashboard
                         </a>
-                        
-                        <a href="{{ route('admin.layanan.index') }}" 
-                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.layanan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                            Layanan
-                        </a>
-                        
-                        <a href="{{ route('admin.periode.index') }}" 
-                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.periode.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            Periode Survei
-                        </a>
-                    </div>
-                    
-                    <div class="pt-4 mt-4 border-t border-gray-200">
-                        <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Manajemen User</p>
-                        
-                        <a href="{{ route('admin.users.index') }}" 
-                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
-                            Users
-                        </a>
-                    </div>
-                    
-                    <div class="pt-4 mt-4 border-t border-gray-200">
-                        <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Laporan</p>
-                        
-                        <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 rounded-lg hover:bg-gray-50">
+                    @endif
+
+                    <!-- ========================================== -->
+                    <!-- DASHBOARD OPD - Admin OPD & Pimpinan OPD -->
+                    <!-- ========================================== -->
+                    @if($isAdminOPD || $isPimpinanOPD)
+                        <a href="{{ route('admin.opd.dashboard') }}" 
+                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.opd.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            Laporan Survei
+                            Dashboard OPD
                         </a>
-                    </div>
                     @endif
+
+                    <!-- ========================================== -->
+                    <!-- DASHBOARD PIMPINAN UTAMA -->
+                    <!-- ========================================== -->
+                    @if($isPimpinanUtama || $isSuperAdmin)
+                        <a href="{{ route('admin.utama.dashboard') }}" 
+                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.utama.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Dashboard Utama
+                        </a>
+                    @endif
+
+                    <!-- ========================================== -->
+                    <!-- MENU ADMIN OPD - LAYANAN -->
+                    <!-- ========================================== -->
+                    @if($isAdminOPD)
+                        <div class="pt-4 mt-4 border-t border-gray-200">
+                            <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Manajemen</p>
+                            
+                            <a href="{{ route('admin.opd.layanan.index') }}" 
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.opd.layanan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Layanan
+                            </a>
+                        </div>
+                    @endif
+
+                    <!-- ========================================== -->
+                    <!-- MENU SUPER ADMIN ONLY -->
+                    <!-- ========================================== -->
+                    @if($isSuperAdmin)
+                        <div class="pt-4 mt-4 border-t border-gray-200">
+                            <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Master Data</p>
+                            
+                            <a href="{{ route('admin.opd.index') }}" 
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.opd.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                OPD
+                            </a>
+                            
+                            <a href="{{ route('admin.layanan.index') }}" 
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.layanan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Layanan
+                            </a>
+                            
+                            <a href="{{ route('admin.periode.index') }}" 
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.periode.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Periode Survei
+                            </a>
+                        </div>
+                        
+                        <div class="pt-4 mt-4 border-t border-gray-200">
+                            <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Manajemen User</p>
+                            
+                            <a href="{{ route('admin.users.index') }}" 
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                Users
+                            </a>
+                        </div>
+                        
+                    @endif
+
+                    <!-- ========================================== -->
+                    <!-- MENU LAPORAN - SEMUA ROLE -->
+                    <!-- ========================================== -->
+                    @if($isSuperAdmin || $isAdminOPD || $isPimpinanOPD || $isPimpinanUtama)
+                        <div class="pt-4 mt-4 border-t border-gray-200">
+                            <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Laporan</p>
+                            
+                            <a href="{{ route('admin.laporan.index') }}" 
+                            class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.laporan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Laporan Survei
+                            </a>
+                        </div>
+                    @endif
+
                 </div>
             </nav>
         </div>

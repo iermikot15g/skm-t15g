@@ -35,7 +35,7 @@ class SurveiResponse extends Model
 
     public function layanan(): BelongsTo
     {
-        return $this->belongsTo(Layanan::class);
+        return $this->belongsTo(Layanan::class, 'layanan_id');
     }
 
     public function periode(): BelongsTo
@@ -45,6 +45,6 @@ class SurveiResponse extends Model
 
     public function jawabans(): HasMany
     {
-        return $this->hasMany(JawabanSurvei::class);
+        return $this->hasMany(JawabanSurvei::class, 'survei_response_id');
     }
 }

@@ -7,8 +7,10 @@ use App\Http\Controllers\Admin\OPDController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PeriodeController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OPD\DashboardController as OPDDashboardController;
+use App\Http\Controllers\Admin\PimpinanUtama\DashboardController as PimpinanUtamaDashboardController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 // ============================================
 // PUBLIC ROUTES
@@ -31,31 +33,105 @@ Route::prefix('survei')->name('survey.')->group(function () {
 });
 
 // ============================================
-// ADMIN ROUTES - Semua role admin
+// DASHBOARD ROUTE - WAJIB ADA UNTUK REDIRECT AFTER LOGIN
 // ============================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:super_admin,admin_opd,pimpinan_opd,pimpinan_utama'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    
+    // Redirect berdasarkan role
+    if ($user->isSuperAdmin()) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->isAdminOPD() || $user->isPimpinanOPD()) {
+        return redirect()->route('admin.opd.dashboard');
+    } elseif ($user->isPimpinanUtama()) {
+        // ✅ PERBAIKAN: Redirect ke dashboard pimpinan utama
+        return redirect()->route('admin.utama.dashboard');
+    }
+    
+    // Default fallback - tampilkan view dashboard biasa
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+// ============================================
+// PROFILE ROUTES (Breeze)
+// ============================================
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // ============================================
-// ADMIN ROUTES - Super Admin Only
+// ADMIN ROUTES - Semua role admin (Dashboard Utama)
 // ============================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
-    // OPD Management
-    Route::resource('opd', OPDController::class);
-    Route::post('/opd/{opd}/toggle', [OPDController::class, 'toggle'])->name('opd.toggle');
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     
-    // Layanan Management
-    Route::resource('layanan', LayananController::class);
-    Route::post('/layanan/{layanan}/toggle', [LayananController::class, 'toggle'])->name('layanan.toggle');
+    // Dashboard Super Admin - hanya super_admin
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
     
-    // Periode Management
-    Route::resource('periode', PeriodeController::class);
-    Route::post('/periode/{periode}/toggle', [PeriodeController::class, 'toggle'])->name('periode.toggle');
+    // ============================================
+    // ADMIN OPD DASHBOARD - admin_opd dan pimpinan_opd
+    // ============================================
+    Route::middleware(['role:admin_opd,pimpinan_opd'])->group(function () {
+        Route::get('/opd/dashboard', [OPDDashboardController::class, 'index'])->name('opd.dashboard');
+    });
+
+    // ============================================
+    // ADMIN OPD - LAYANAN MANAGEMENT (CRUD)
+    // ============================================
+    Route::middleware(['role:admin_opd'])->prefix('opd')->name('opd.')->group(function () {
+        Route::resource('layanan', \App\Http\Controllers\Admin\OPD\LayananController::class)
+            ->except(['show']);
+        Route::post('/layanan/{layanan}/toggle', [\App\Http\Controllers\Admin\OPD\LayananController::class, 'toggle'])
+            ->name('layanan.toggle');
+    });
     
-    // User Management
-    Route::resource('users', UserController::class);
-    Route::post('/users/{user}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
+    // ============================================
+    // SUPER ADMIN ONLY - CRUD Operations
+    // ============================================
+    Route::middleware(['role:super_admin'])->group(function () {
+        // OPD Management
+        Route::resource('opd', OPDController::class);
+        Route::post('/opd/{opd}/toggle', [OPDController::class, 'toggle'])->name('opd.toggle');
+        
+        // Layanan Management
+        Route::resource('layanan', LayananController::class);
+        Route::post('/layanan/{layanan}/toggle', [LayananController::class, 'toggle'])->name('layanan.toggle');
+        
+        // Periode Management
+        Route::resource('periode', PeriodeController::class);
+        Route::post('/periode/{periode}/toggle', [PeriodeController::class, 'toggle'])->name('periode.toggle');
+        
+        // User Management
+        Route::resource('users', UserController::class);
+        Route::post('/users/{user}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
+    });
+
+    // ============================================
+    // ✅ PIMPINAN UTAMA DASHBOARD - Perbaikan
+    // ============================================
+    Route::middleware(['role:pimpinan_utama,super_admin'])->group(function () {
+        Route::get('/utama/dashboard', [PimpinanUtamaDashboardController::class, 'index'])->name('utama.dashboard');
+    });
+});
+
+// ============================================
+// LAPORAN ROUTES
+// ============================================
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+    
+    // Laporan - untuk semua role admin
+    Route::middleware(['role:super_admin,admin_opd,pimpinan_opd,pimpinan_utama'])->group(function () {
+        Route::get('/laporan', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('laporan.index');
+        Route::post('/laporan/export-pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportPDF'])->name('laporan.export-pdf');
+        Route::post('/laporan/export-excel', [\App\Http\Controllers\Admin\ReportController::class, 'exportExcel'])->name('laporan.export-excel');
+    });
 });
 
 // ============================================

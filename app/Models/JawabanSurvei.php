@@ -18,11 +18,11 @@ class JawabanSurvei extends Model
 
     public function surveiResponse(): BelongsTo
     {
-        return $this->belongsTo(SurveiResponse::class);
+        return $this->belongsTo(SurveiResponse::class, 'survei_response_id');
     }
 
     public function pertanyaan(): BelongsTo
     {
-        return $this->belongsTo(PertanyaanSurvei::class);
+        return $this->belongsTo(PertanyaanSurvei::class, 'pertanyaan_id');
     }
 }

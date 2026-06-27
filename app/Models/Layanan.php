@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany; // plan kedua hapus ini
 
 class Layanan extends Model
 {
@@ -29,7 +30,7 @@ class Layanan extends Model
     }
 
     // Relasi ke SurveiResponse
-    public function surveiResponses(): HasMany
+    public function surveiResponses(): HasMany // plan kedua hapus HasMany
     {
         return $this->hasMany(SurveiResponse::class, 'layanan_id');
     }
