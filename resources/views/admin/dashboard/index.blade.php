@@ -11,30 +11,45 @@
     <!-- FILTER -->
     <!-- ========================================== -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-end gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700">Periode Survei</label>
-                <select name="periode_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Semua Periode</option>
-                    @foreach($periodes as $periode)
-                        <option value="{{ $periode->id }}" {{ $periodeId == $periode->id ? 'selected' : '' }}>
-                            {{ $periode->nama_periode }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex gap-2">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        <div class="flex flex-wrap items-end gap-4">
+            <!-- FORM FILTER -->
+            <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-end gap-4 flex-1">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700">Periode Survei</label>
+                    <select name="periode_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Semua Periode</option>
+                        @foreach($periodes as $periode)
+                            <option value="{{ $periode->id }}" {{ $periodeId == $periode->id ? 'selected' : '' }}>
+                                {{ $periode->nama_periode }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Tampilkan
+                    </button>
+                    <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
+            <!-- FORM EXPORT PDF - TERPISAH -->
+            <form action="{{ route('admin.dashboard.export-pdf') }}" method="POST" class="flex items-end">
+                @csrf
+                <input type="hidden" name="periode_id" value="{{ $periodeId }}">
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    Tampilkan
+                    Export PDF
                 </button>
-                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
-                    Reset
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- ========================================== -->

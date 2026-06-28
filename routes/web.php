@@ -47,16 +47,13 @@ Route::get('/dashboard', function () {
     if ($user->isSuperAdmin()) {
         return redirect()->route('admin.dashboard');
     } elseif ($user->isAdminOPD()) {
-        // Admin OPD → dashboard dengan data detail
         return redirect()->route('admin.opd.dashboard');
     } elseif ($user->isPimpinanOPD()) {
-        // ✅ PERBAIKAN: Pimpinan OPD → dashboard ringkas
         return redirect()->route('admin.pimpinan.dashboard');
     } elseif ($user->isPimpinanUtama()) {
         return redirect()->route('admin.utama.dashboard');
     }
     
-    // Default fallback - tampilkan view dashboard biasa
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -79,6 +76,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // ============================================
     Route::middleware(['role:super_admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Super Admin Dashboard - Export PDF
+        Route::post('/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('dashboard.export-pdf');
     });
     
     // ============================================
@@ -86,6 +86,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // ============================================
     Route::middleware(['role:admin_opd'])->group(function () {
         Route::get('/opd/dashboard', [OPDDashboardController::class, 'index'])->name('opd.dashboard');
+        
+        // Admin OPD Dashboard - Export PDF
+        Route::post('/opd/dashboard/export-pdf', [OPDDashboardController::class, 'exportPDF'])->name('opd.dashboard.export-pdf');
     });
     
     // ============================================
@@ -93,6 +96,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // ============================================
     Route::middleware(['role:pimpinan_opd'])->group(function () {
         Route::get('/pimpinan/dashboard', [PimpinanDashboardController::class, 'index'])->name('pimpinan.dashboard');
+        
+        // Pimpinan OPD Dashboard - Export PDF
+        Route::post('/pimpinan/dashboard/export-pdf', [PimpinanDashboardController::class, 'exportPDF'])->name('pimpinan.dashboard.export-pdf');
     });
     
     // ============================================
@@ -100,6 +106,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     // ============================================
     Route::middleware(['role:pimpinan_utama,super_admin'])->group(function () {
         Route::get('/utama/dashboard', [PimpinanUtamaDashboardController::class, 'index'])->name('utama.dashboard');
+        
+        // Pimpinan Utama Dashboard - Export PDF
+        Route::post('/utama/dashboard/export-pdf', [PimpinanUtamaDashboardController::class, 'exportPDF'])->name('utama.dashboard.export-pdf');
     });
 
     // ============================================

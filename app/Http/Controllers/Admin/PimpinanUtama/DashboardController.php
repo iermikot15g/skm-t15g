@@ -5,17 +5,26 @@ namespace App\Http\Controllers\Admin\PimpinanUtama;
 
 use App\Http\Controllers\Controller;
 use App\Services\Report\ReportService;
+use App\Services\Report\DashboardPDFGenerator;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     protected ReportService $reportService;
+    protected DashboardPDFGenerator $pdfGenerator;
 
-    public function __construct(ReportService $reportService)
+    /**
+     * Constructor dengan 2 dependencies
+     */
+    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
     {
         $this->reportService = $reportService;
+        $this->pdfGenerator = $pdfGenerator;
     }
 
+    /**
+     * Tampilkan dashboard Pimpinan Utama
+     */
     public function index(Request $request)
     {
         $periodeId = $request->periode_id;
@@ -73,6 +82,9 @@ class DashboardController extends Controller
         ));
     }
 
+    /**
+     * Prepare data untuk chart
+     */
     private function prepareChartData($allStats)
     {
         $labels = [];
@@ -94,5 +106,18 @@ class DashboardController extends Controller
             'data' => $data,
             'colors' => $colors,
         ];
+    }
+
+    /**
+     * Export dashboard ke PDF
+     */
+    public function exportPDF(Request $request)
+    {
+        $periodeId = $request->periode_id;
+        $opdId = $request->opd_id;
+        $pdf = $this->pdfGenerator->generatePimpinanUtamaPDF($periodeId, $opdId);
+        
+        $filename = 'Dashboard_PimpinanUtama_' . date('Ymd') . '.pdf';
+        return $pdf->download($filename);
     }
 }

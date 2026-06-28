@@ -5,17 +5,26 @@ namespace App\Http\Controllers\Admin\OPD;
 
 use App\Http\Controllers\Controller;
 use App\Services\Report\ReportService;
+use App\Services\Report\DashboardPDFGenerator;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     protected ReportService $reportService;
+    protected DashboardPDFGenerator $pdfGenerator;
 
-    public function __construct(ReportService $reportService)
+    /**
+     * Constructor dengan 2 dependencies
+     */
+    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
     {
         $this->reportService = $reportService;
+        $this->pdfGenerator = $pdfGenerator;
     }
 
+    /**
+     * Tampilkan dashboard Admin OPD
+     */
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -35,5 +44,19 @@ class DashboardController extends Controller
             'periodes',
             'periodeId'
         ));
+    }
+
+    /**
+     * Export dashboard ke PDF
+     */
+    public function exportPDF(Request $request)
+    {
+        $user = auth()->user();
+        $periodeId = $request->periode_id;
+        $pdf = $this->pdfGenerator->generateAdminOPDPDF($user->opd_id, $periodeId);
+        
+        $opd = \App\Models\OPD::find($user->opd_id);
+        $filename = 'Dashboard_OPD_' . ($opd ? $opd->kode_opd : '') . '_' . date('Ymd') . '.pdf';
+        return $pdf->download($filename);
     }
 }
