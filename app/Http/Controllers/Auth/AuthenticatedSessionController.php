@@ -33,14 +33,16 @@ class AuthenticatedSessionController extends Controller
         
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->isAdminOPD() || $user->isPimpinanOPD()) {
+        } elseif ($user->isAdminOPD()) {
             return redirect()->route('admin.opd.dashboard');
+        } elseif ($user->isPimpinanOPD()) {
+            return redirect()->route('admin.pimpinan.dashboard');
         } elseif ($user->isPimpinanUtama()) {
-            return redirect()->route('admin.utama.dashboard'); // Future
+            return redirect()->route('admin.utama.dashboard');
         }
 
         // Default fallback
-        return redirect()->intended('/dashboard');
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**

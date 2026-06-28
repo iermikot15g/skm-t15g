@@ -1,7 +1,7 @@
 <?php
-// app/Http/Controllers/Admin/OPD/DashboardController.php
+// app/Http/Controllers/Admin/Pimpinan/DashboardController.php
 
-namespace App\Http\Controllers\Admin\OPD;
+namespace App\Http\Controllers\Admin\Pimpinan;
 
 use App\Http\Controllers\Controller;
 use App\Services\Report\ReportService;
@@ -20,7 +20,6 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Jika user tidak memiliki OPD, redirect
         if (!$user->opd_id) {
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Anda tidak terikat dengan OPD tertentu.');
@@ -30,7 +29,7 @@ class DashboardController extends Controller
         $periodes = $this->reportService->getPeriods();
         $data = $this->reportService->getAdminOPDDashboardData($user->opd_id, $periodeId);
 
-        return view('admin.opd.dashboard', compact(
+        return view('admin.pimpinan.dashboard', compact(
             'data',
             'periodes',
             'periodeId'

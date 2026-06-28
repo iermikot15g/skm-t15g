@@ -70,8 +70,13 @@
                     <!-- DASHBOARD OPD - Admin OPD & Pimpinan OPD -->
                     <!-- ========================================== -->
                     @if($isAdminOPD || $isPimpinanOPD)
-                        <a href="{{ route('admin.opd.dashboard') }}" 
-                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.opd.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                        @php
+                            // Tentukan route dashboard berdasarkan role
+                            $dashboardRoute = $isAdminOPD ? route('admin.opd.dashboard') : route('admin.pimpinan.dashboard');
+                            $isDashboardActive = $isAdminOPD ? request()->routeIs('admin.opd.dashboard') : request()->routeIs('admin.pimpinan.dashboard');
+                        @endphp
+                        <a href="{{ $dashboardRoute }}" 
+                           class="flex items-center px-4 py-3 text-sm rounded-lg {{ $isDashboardActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -152,7 +157,6 @@
                                 Users
                             </a>
                         </div>
-                        
                     @endif
 
                     <!-- ========================================== -->
@@ -163,7 +167,7 @@
                             <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Laporan</p>
                             
                             <a href="{{ route('admin.laporan.index') }}" 
-                            class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.laporan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                               class="flex items-center px-4 py-3 text-sm rounded-lg {{ request()->routeIs('admin.laporan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
