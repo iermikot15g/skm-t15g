@@ -3,69 +3,82 @@
 
 namespace App\Http\Controllers\Admin\PimpinanUtama;
 
-use App\Http\Controllers\Controller;
-use App\Services\Report\ReportService;
-use App\Services\Report\DashboardPDFGenerator;
+use App\Http\Controllers\Admin\BaseAdminController;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class DashboardController extends BaseAdminController
 {
-    protected ReportService $reportService;
-    protected DashboardPDFGenerator $pdfGenerator;
-
-    /**
-     * Constructor dengan 2 dependencies
-     */
-    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
+    protected function getDashboardView(): string
     {
-        $this->reportService = $reportService;
-        $this->pdfGenerator = $pdfGenerator;
+        return 'admin.pimpinan-utama.dashboard';
     }
 
-    /**
-     * Tampilkan dashboard Pimpinan Utama
-     */
-    public function index(Request $request)
+    protected function getPDFView(): string
+    {
+        return 'admin.pimpinan-utama.dashboard-pdf';
+    }
+
+    protected function getExportRouteName(): string
+    {
+        return 'admin.utama.dashboard.export-pdf';
+    }
+
+    protected function getPDFFilename(): string
+    {
+        return 'Dashboard_PimpinanUtama_' . date('Ymd') . '.pdf';
+    }
+
+    protected function getDashboardData(Request $request): array
     {
         $periodeId = $request->periode_id;
         $selectedOPD = $request->opd_id;
 
-        // Ambil semua periode untuk filter
-        $periodes = $this->reportService->getPeriods();
-
-        // Ambil statistik dengan filter
         $allStats = $this->reportService->getAllOPDStats($periodeId);
 
-        // Filter berdasarkan OPD jika dipilih
         if ($selectedOPD && $selectedOPD !== 'all') {
             $allStats = array_filter($allStats, function ($item) use ($selectedOPD) {
                 return $item['opd']->id == $selectedOPD;
             });
-            // Re-index array
             $allStats = array_values($allStats);
         }
 
-        // Hitung total keseluruhan
+        return [
+            'allStats' => $allStats,
+            'selectedOPD' => $selectedOPD,
+        ];
+    }
+
+    protected function generatePDF(Request $request): \Barryvdh\DomPDF\PDF
+    {
+        $periodeId = $request->periode_id;
+        $opdId = $request->opd_id;
+        return $this->pdfGenerator->generatePimpinanUtamaPDF($periodeId, $opdId);
+    }
+
+    /**
+     * Override index to include additional data
+     */
+    public function index(Request $request)
+    {
+        $data = $this->getDashboardData($request);
+        $periodes = $this->reportService->getPeriods();
+        $periodeId = $request->periode_id;
+        $selectedOPD = $request->opd_id;
+
+        // Calculate stats
+        $allStats = $data['allStats'];
         $totalResponses = collect($allStats)->sum('total_responses');
         $totalOPD = count($allStats);
-
-        // IKM keseluruhan
-        $ikmOverall = null;
+        
         $ikmData = collect($allStats)->filter(function ($item) {
             return $item['ikm'] !== null;
         });
+        $ikmOverall = $ikmData->isNotEmpty() ? round($ikmData->avg('ikm.ikm'), 2) : null;
 
-        if ($ikmData->isNotEmpty()) {
-            $avgIKM = $ikmData->avg('ikm.ikm');
-            $ikmOverall = round($avgIKM, 2);
-        }
-
-        // OPD dengan IKM tertinggi dan terendah
         $sortedByIKM = $ikmData->sortByDesc('ikm.ikm');
         $topOPD = $sortedByIKM->first();
         $bottomOPD = $sortedByIKM->last();
 
-        // Data untuk chart
         $chartData = $this->prepareChartData($allStats);
 
         return view('admin.pimpinan-utama.dashboard', compact(
@@ -82,9 +95,6 @@ class DashboardController extends Controller
         ));
     }
 
-    /**
-     * Prepare data untuk chart
-     */
     private function prepareChartData($allStats)
     {
         $labels = [];
@@ -95,7 +105,6 @@ class DashboardController extends Controller
             if ($stat['ikm'] !== null) {
                 $labels[] = $stat['opd']->nama_opd;
                 $data[] = $stat['ikm']['ikm'];
-                
                 $category = $stat['ikm']['category'];
                 $colors[] = $category['color'] ?? '#3B82F6';
             }
@@ -106,18 +115,5 @@ class DashboardController extends Controller
             'data' => $data,
             'colors' => $colors,
         ];
-    }
-
-    /**
-     * Export dashboard ke PDF
-     */
-    public function exportPDF(Request $request)
-    {
-        $periodeId = $request->periode_id;
-        $opdId = $request->opd_id;
-        $pdf = $this->pdfGenerator->generatePimpinanUtamaPDF($periodeId, $opdId);
-        
-        $filename = 'Dashboard_PimpinanUtama_' . date('Ymd') . '.pdf';
-        return $pdf->download($filename);
     }
 }

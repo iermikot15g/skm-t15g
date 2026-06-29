@@ -71,7 +71,6 @@
                     <!-- ========================================== -->
                     @if($isAdminOPD || $isPimpinanOPD)
                         @php
-                            // Tentukan route dashboard berdasarkan role
                             $dashboardRoute = $isAdminOPD ? route('admin.opd.dashboard') : route('admin.pimpinan.dashboard');
                             $isDashboardActive = $isAdminOPD ? request()->routeIs('admin.opd.dashboard') : request()->routeIs('admin.pimpinan.dashboard');
                         @endphp
@@ -217,6 +216,11 @@
             <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-100">
                 @yield('content')
             </main>
+
+            <!-- ========================================== -->
+            <!-- STACK SCRIPTS - PASTIKAN INI ADA UNTUK CHART -->
+            <!-- ========================================== -->
+            @stack('scripts')
         </div>
     </div>
 </body>

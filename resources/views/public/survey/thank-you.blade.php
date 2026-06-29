@@ -25,7 +25,7 @@
 
         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
             <p class="text-sm text-gray-500">Kode Referensi</p>
-            <p class="text-xl font-mono font-bold text-blue-600">SKM-2026-001234</p>
+            <p class="text-xl font-mono font-bold text-blue-600">{{ $referenceCode ?? 'SKM-2026-001234' }}</p>
         </div>
 
         <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">

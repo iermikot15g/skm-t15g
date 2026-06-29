@@ -3,44 +3,39 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Services\Report\ReportService;
-use App\Services\Report\DashboardPDFGenerator;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class DashboardController extends BaseAdminController
 {
-    protected ReportService $reportService;
-    protected DashboardPDFGenerator $pdfGenerator;
-
-    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
+    protected function getDashboardView(): string
     {
-        $this->reportService = $reportService;
-        $this->pdfGenerator = $pdfGenerator;
+        return 'admin.dashboard.index';
     }
 
-    public function index(Request $request)
+    protected function getPDFView(): string
     {
-        $periodeId = $request->periode_id;
-        $periodes = $this->reportService->getPeriods();
-        $data = $this->reportService->getSuperAdminDashboardData($periodeId);
-
-        return view('admin.dashboard.index', compact(
-            'data',
-            'periodes',
-            'periodeId'
-        ));
+        return 'admin.dashboard.pdf';
     }
 
-    /**
-     * Export dashboard ke PDF
-     */
-    public function exportPDF(Request $request)
+    protected function getExportRouteName(): string
+    {
+        return 'admin.dashboard.export-pdf';
+    }
+
+    protected function getPDFFilename(): string
+    {
+        return 'Dashboard_SuperAdmin_' . date('Ymd') . '.pdf';
+    }
+
+    protected function getDashboardData(Request $request): array
     {
         $periodeId = $request->periode_id;
-        $pdf = $this->pdfGenerator->generateSuperAdminPDF($periodeId);
-        
-        $filename = 'Dashboard_SuperAdmin_' . date('Ymd') . '.pdf';
-        return $pdf->download($filename);
+        return $this->reportService->getSuperAdminDashboardData($periodeId);
+    }
+
+    protected function generatePDF(Request $request): \Barryvdh\DomPDF\PDF
+    {
+        $periodeId = $request->periode_id;
+        return $this->pdfGenerator->generateSuperAdminPDF($periodeId);
     }
 }

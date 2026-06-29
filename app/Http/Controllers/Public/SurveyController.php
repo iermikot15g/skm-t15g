@@ -7,7 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Services\Survey\SurveyService;
 use App\Models\OPD;
 use App\Models\PertanyaanSurvei;
+use App\Models\Responden;
+use App\Models\SurveiResponse;
+use App\Models\JawabanSurvei;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SurveyController extends Controller
 {
@@ -84,13 +90,11 @@ class SurveyController extends Controller
      */
     public function questions()
     {
-        // Cek apakah data identitas ada di session
         if (!session()->has('survey_identity')) {
             return redirect()->route('survey.opd')
                 ->with('error', 'Silakan isi identitas terlebih dahulu.');
         }
 
-        // Ambil 9 pertanyaan dengan urutan yang benar
         $questions = PertanyaanSurvei::with('unsur')
             ->orderBy('urutan')
             ->get();
@@ -108,7 +112,6 @@ class SurveyController extends Controller
             'answers.*' => 'required|integer|between:1,4',
         ]);
 
-        // Simpan jawaban di session
         session(['survey_answers' => $request->answers]);
 
         return redirect()->route('survey.kritik-saran')
@@ -120,7 +123,6 @@ class SurveyController extends Controller
      */
     public function kritikSaran()
     {
-        // Cek apakah data identitas dan jawaban ada di session
         if (!session()->has('survey_identity') || !session()->has('survey_answers')) {
             return redirect()->route('survey.opd')
                 ->with('error', 'Silakan isi identitas dan jawaban terlebih dahulu.');
@@ -130,7 +132,7 @@ class SurveyController extends Controller
     }
 
     /**
-     * Simpan kritik & saran
+     * ✅ Simpan kritik & saran (OPSIONAL)
      */
     public function storeKritikSaran(Request $request)
     {
@@ -138,30 +140,28 @@ class SurveyController extends Controller
             'kritik_saran' => 'nullable|string|max:1000',
         ]);
 
-        session(['survey_kritik_saran' => $request->kritik_saran]);
+        // ✅ Selalu set session, walaupun kosong
+        session(['survey_kritik_saran' => $request->kritik_saran ?? null]);
 
         return redirect()->route('survey.review')
             ->with('success', 'Kritik & saran berhasil disimpan.');
     }
 
     /**
-     * Tampilkan halaman review
+     * ✅ Tampilkan halaman review (Kritik & Saran OPSIONAL)
      */
     public function review()
     {
-        // Cek apakah semua data ada di session
-        if (!session()->has('survey_identity') || 
-            !session()->has('survey_answers') || 
-            !session()->has('survey_kritik_saran')) {
+        // ✅ Hanya cek identity dan answers (wajib)
+        if (!session()->has('survey_identity') || !session()->has('survey_answers')) {
             return redirect()->route('survey.opd')
                 ->with('error', 'Data survei tidak lengkap. Silakan mulai dari awal.');
         }
 
         $identity = session('survey_identity');
         $answers = session('survey_answers');
-        $kritikSaran = session('survey_kritik_saran');
+        $kritikSaran = session('survey_kritik_saran'); // Bisa null (opsional)
 
-        // Ambil data pertanyaan untuk ditampilkan di review
         $questions = PertanyaanSurvei::with('unsur')
             ->orderBy('urutan')
             ->get();
@@ -170,13 +170,114 @@ class SurveyController extends Controller
     }
 
     /**
-     * Submit final survei
+     * Submit final survei ke database
      */
     public function submit(Request $request)
     {
-        // TODO: Implement submit ke database
-        // Untuk sementara redirect ke thank you
-        return view('public.survey.thank-you');
+        try {
+            DB::beginTransaction();
+
+            $identity = session('survey_identity');
+            $answers = session('survey_answers');
+            $kritikSaran = session('survey_kritik_saran');
+            $periodeId = session('survey_period_id');
+
+            if (!$identity || !$answers) {
+                return redirect()->route('survey.opd')
+                    ->with('error', 'Data survei tidak lengkap. Silakan mulai dari awal.');
+            }
+
+            if (!$periodeId) {
+                return redirect()->route('survey.opd')
+                    ->with('error', 'Periode survei tidak ditemukan.');
+            }
+
+            $encryptedNik = Crypt::encryptString($identity['nik']);
+
+            $existingResponden = Responden::where('nik', $encryptedNik)->first();
+
+            if ($existingResponden) {
+                $exists = SurveiResponse::where('responden_id', $existingResponden->id)
+                    ->where('layanan_id', $identity['layanan_id'])
+                    ->where('periode_id', $periodeId)
+                    ->where('status', 'completed')
+                    ->exists();
+
+                if ($exists) {
+                    return back()->with('error', 'Anda sudah mengisi survei untuk layanan ini di periode ini.');
+                }
+            }
+
+            $responden = Responden::updateOrCreate(
+                ['nik' => $encryptedNik],
+                [
+                    'nama' => $identity['nama'],
+                    'hp' => Crypt::encryptString($identity['hp']),
+                    'usia' => $identity['usia'],
+                    'jenis_kelamin' => $identity['jenis_kelamin'],
+                    'pendidikan' => $identity['pendidikan'],
+                    'pekerjaan' => $identity['pekerjaan'],
+                    'pekerjaan_lainnya' => $identity['pekerjaan_lainnya'] ?? null,
+                ]
+            );
+
+            $surveiResponse = SurveiResponse::create([
+                'responden_id' => $responden->id,
+                'layanan_id' => $identity['layanan_id'],
+                'periode_id' => $periodeId,
+                'kritik_saran' => $kritikSaran ?? null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'reviewed_at' => now(),
+                'submitted_at' => now(),
+                'status' => 'completed',
+            ]);
+
+            foreach ($answers as $pertanyaanId => $nilai) {
+                JawabanSurvei::create([
+                    'survei_response_id' => $surveiResponse->id,
+                    'pertanyaan_id' => $pertanyaanId,
+                    'nilai' => $nilai,
+                ]);
+            }
+
+            DB::commit();
+
+            session()->forget([
+                'survey_identity',
+                'survey_answers',
+                'survey_kritik_saran',
+                'survey_opd_id',
+                'survey_period_id'
+            ]);
+
+            $referenceCode = $this->generateReferenceCode($surveiResponse);
+
+            return view('public.survey.thank-you', compact('referenceCode'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Survey Submit Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan survei. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Generate kode referensi
+     */
+    private function generateReferenceCode($surveiResponse): string
+    {
+        $opdId = $surveiResponse->layanan->opd_id ?? '00';
+        return sprintf(
+            'SKM-%s-%s-%s',
+            date('Y'),
+            str_pad($opdId, 3, '0', STR_PAD_LEFT),
+            str_pad($surveiResponse->id, 6, '0', STR_PAD_LEFT)
+        );
     }
 
     /**

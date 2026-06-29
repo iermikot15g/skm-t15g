@@ -3,60 +3,62 @@
 
 namespace App\Http\Controllers\Admin\OPD;
 
-use App\Http\Controllers\Controller;
-use App\Services\Report\ReportService;
-use App\Services\Report\DashboardPDFGenerator;
+use App\Http\Controllers\Admin\BaseAdminController;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class DashboardController extends BaseAdminController
 {
-    protected ReportService $reportService;
-    protected DashboardPDFGenerator $pdfGenerator;
-
-    /**
-     * Constructor dengan 2 dependencies
-     */
-    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
+    protected function getDashboardView(): string
     {
-        $this->reportService = $reportService;
-        $this->pdfGenerator = $pdfGenerator;
+        return 'admin.opd.dashboard';
+    }
+
+    protected function getPDFView(): string
+    {
+        return 'admin.opd.dashboard-pdf';
+    }
+
+    protected function getExportRouteName(): string
+    {
+        return 'admin.opd.dashboard.export-pdf';
+    }
+
+    protected function getPDFFilename(): string
+    {
+        $user = auth()->user();
+        $opd = \App\Models\OPD::find($user->opd_id);
+        return 'Dashboard_OPD_' . ($opd ? $opd->kode_opd : '') . '_' . date('Ymd') . '.pdf';
+    }
+
+    protected function getDashboardData(Request $request): array
+    {
+        $user = auth()->user();
+        $periodeId = $request->periode_id;
+        
+        if (!$user->opd_id) {
+            throw new \Exception('Anda tidak terikat dengan OPD tertentu.');
+        }
+        
+        return $this->reportService->getAdminOPDDashboardData($user->opd_id, $periodeId);
+    }
+
+    protected function generatePDF(Request $request): \Barryvdh\DomPDF\PDF
+    {
+        $user = auth()->user();
+        $periodeId = $request->periode_id;
+        return $this->pdfGenerator->generateAdminOPDPDF($user->opd_id, $periodeId);
     }
 
     /**
-     * Tampilkan dashboard Admin OPD
+     * Override index to handle OPD check
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        
-        // Jika user tidak memiliki OPD, redirect
-        if (!$user->opd_id) {
+        try {
+            return parent::index($request);
+        } catch (\Exception $e) {
             return redirect()->route('admin.dashboard')
-                ->with('error', 'Anda tidak terikat dengan OPD tertentu.');
+                ->with('error', $e->getMessage());
         }
-
-        $periodeId = $request->periode_id;
-        $periodes = $this->reportService->getPeriods();
-        $data = $this->reportService->getAdminOPDDashboardData($user->opd_id, $periodeId);
-
-        return view('admin.opd.dashboard', compact(
-            'data',
-            'periodes',
-            'periodeId'
-        ));
-    }
-
-    /**
-     * Export dashboard ke PDF
-     */
-    public function exportPDF(Request $request)
-    {
-        $user = auth()->user();
-        $periodeId = $request->periode_id;
-        $pdf = $this->pdfGenerator->generateAdminOPDPDF($user->opd_id, $periodeId);
-        
-        $opd = \App\Models\OPD::find($user->opd_id);
-        $filename = 'Dashboard_OPD_' . ($opd ? $opd->kode_opd : '') . '_' . date('Ymd') . '.pdf';
-        return $pdf->download($filename);
     }
 }

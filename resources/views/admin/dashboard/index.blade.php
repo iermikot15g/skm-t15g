@@ -38,7 +38,7 @@
                 </div>
             </form>
 
-            <!-- FORM EXPORT PDF - TERPISAH -->
+            <!-- FORM EXPORT PDF -->
             <form action="{{ route('admin.dashboard.export-pdf') }}" method="POST" class="flex items-end">
                 @csrf
                 <input type="hidden" name="periode_id" value="{{ $periodeId }}">
@@ -162,6 +162,7 @@
     <!-- TABEL: 5 OPD Terbaik & Terendah -->
     <!-- ========================================== -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- 5 OPD Terbaik -->
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-green-600 mb-4">🏆 5 OPD Terbaik</h3>
             <div class="overflow-x-auto">
@@ -196,6 +197,7 @@
             </div>
         </div>
 
+        <!-- 5 OPD Terendah -->
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-red-600 mb-4">⚠️ 5 OPD Terendah</h3>
             <div class="overflow-x-auto">

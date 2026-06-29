@@ -36,7 +36,7 @@
             </div>
         </form>
 
-        <!-- FORM EXPORT PDF - TERPISAH -->
+        <!-- FORM EXPORT PDF -->
         <form action="{{ route('admin.opd.dashboard.export-pdf') }}" method="POST" class="flex items-end">
             @csrf
             <input type="hidden" name="periode_id" value="{{ $periodeId }}">

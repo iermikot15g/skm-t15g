@@ -3,59 +3,59 @@
 
 namespace App\Http\Controllers\Admin\Pimpinan;
 
-use App\Http\Controllers\Controller;
-use App\Services\Report\ReportService;
-use App\Services\Report\DashboardPDFGenerator;
+use App\Http\Controllers\Admin\BaseAdminController;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class DashboardController extends BaseAdminController
 {
-    protected ReportService $reportService;
-    protected DashboardPDFGenerator $pdfGenerator;
-
-    /**
-     * Constructor dengan 2 dependencies
-     */
-    public function __construct(ReportService $reportService, DashboardPDFGenerator $pdfGenerator)
+    protected function getDashboardView(): string
     {
-        $this->reportService = $reportService;
-        $this->pdfGenerator = $pdfGenerator;
+        return 'admin.pimpinan.dashboard';
     }
 
-    /**
-     * Tampilkan dashboard Pimpinan OPD
-     */
-    public function index(Request $request)
+    protected function getPDFView(): string
+    {
+        return 'admin.pimpinan.dashboard-pdf';
+    }
+
+    protected function getExportRouteName(): string
+    {
+        return 'admin.pimpinan.dashboard.export-pdf';
+    }
+
+    protected function getPDFFilename(): string
     {
         $user = auth()->user();
+        $opd = \App\Models\OPD::find($user->opd_id);
+        return 'Dashboard_Pimpinan_' . ($opd ? $opd->kode_opd : '') . '_' . date('Ymd') . '.pdf';
+    }
+
+    protected function getDashboardData(Request $request): array
+    {
+        $user = auth()->user();
+        $periodeId = $request->periode_id;
         
         if (!$user->opd_id) {
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Anda tidak terikat dengan OPD tertentu.');
+            throw new \Exception('Anda tidak terikat dengan OPD tertentu.');
         }
-
-        $periodeId = $request->periode_id;
-        $periodes = $this->reportService->getPeriods();
-        $data = $this->reportService->getAdminOPDDashboardData($user->opd_id, $periodeId);
-
-        return view('admin.pimpinan.dashboard', compact(
-            'data',
-            'periodes',
-            'periodeId'
-        ));
+        
+        return $this->reportService->getAdminOPDDashboardData($user->opd_id, $periodeId);
     }
 
-    /**
-     * Export dashboard ke PDF
-     */
-    public function exportPDF(Request $request)
+    protected function generatePDF(Request $request): \Barryvdh\DomPDF\PDF
     {
         $user = auth()->user();
         $periodeId = $request->periode_id;
-        $pdf = $this->pdfGenerator->generatePimpinanOPDPDF($user->opd_id, $periodeId);
-        
-        $opd = \App\Models\OPD::find($user->opd_id);
-        $filename = 'Dashboard_Pimpinan_' . ($opd ? $opd->kode_opd : '') . '_' . date('Ymd') . '.pdf';
-        return $pdf->download($filename);
+        return $this->pdfGenerator->generatePimpinanOPDPDF($user->opd_id, $periodeId);
+    }
+
+    public function index(Request $request)
+    {
+        try {
+            return parent::index($request);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', $e->getMessage());
+        }
     }
 }
