@@ -9,12 +9,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Hanya jalankan production seeder
         $this->call([
-            RoleSeeder::class,
-            SuperAdminSeeder::class,
-            OPDSeeder::class,
-            PeriodeSurveiSeeder::class,
-            UnsurSurveiSeeder::class, // <-- TAMBAHKAN INI
+            ProductionSeeder::class,
         ]);
+
+        // ⚠️ KOMENTAR atau HAPUS seeder berikut untuk production:
+        // $this->call([OPDSeeder::class]);
+        // $this->call([PeriodeSurveiSeeder::class]);
+        // $this->call([UnsurSurveiSeeder::class]);
+        // $this->call([SurveiTestSeeder::class]);
     }
 }
