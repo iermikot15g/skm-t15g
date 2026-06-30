@@ -37,6 +37,12 @@ class IKMConstants
     public const IKM_MIN = 25;
     
     /**
+     * ✅ Faktor konversi IKM (100 / SKALA_MAX = 100 / 4 = 25)
+     * Digunakan untuk mengkonversi nilai rata-rata (1-4) ke skala IKM (25-100)
+     */
+    public const KONVERSI_IKM = self::IKM_MAX / self::SKALA_MAX; // 25
+    
+    /**
      * Target IKM untuk kategori "Sangat Baik"
      */
     public const TARGET_IKM = 88.31;

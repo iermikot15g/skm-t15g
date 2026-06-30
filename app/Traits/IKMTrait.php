@@ -29,7 +29,10 @@ trait IKMTrait
         
         $total = array_sum($values);
         $average = $total / IKMConstants::UNSUUR_COUNT;
-        $ikm = $average * (IKMConstants::IKM_MAX / IKMConstants::UNSUUR_COUNT);
+        
+        // ✅ PERBAIKAN: IKM = Rata-rata × 25 (sesuai PermenPANRB)
+        // Skala 1-4 dikonversi ke 25-100
+        $ikm = $average * IKMConstants::KONVERSI_IKM;
         
         return [
             'average' => round($average, 2),
@@ -86,8 +89,9 @@ trait IKMTrait
     {
         $nilai = $response->jawabans->pluck('nilai')->toArray();
         if (count($nilai) === IKMConstants::UNSUUR_COUNT) {
-            return round((array_sum($nilai) / IKMConstants::UNSUUR_COUNT) 
-                * (IKMConstants::IKM_MAX / IKMConstants::UNSUUR_COUNT), 2);
+            // ✅ PERBAIKAN: IKM = Rata-rata × 25
+            $average = array_sum($nilai) / IKMConstants::UNSUUR_COUNT;
+            return round($average * IKMConstants::KONVERSI_IKM, 2);
         }
         return null;
     }

@@ -10,6 +10,10 @@ class IKMStatsService
 {
     /**
      * Calculate IKM from array of values (1-4)
+     * 
+     * @param array $values Array of 9 values (1-4)
+     * @return array { average, total, ikm, category }
+     * @throws \InvalidArgumentException
      */
     public function calculateIKM(array $values): array
     {
@@ -21,7 +25,10 @@ class IKMStatsService
         
         $total = array_sum($values);
         $average = $total / IKMConstants::UNSUUR_COUNT;
-        $ikm = $average * (IKMConstants::IKM_MAX / IKMConstants::UNSUUR_COUNT);
+        
+        // ✅ PERBAIKAN: IKM = Rata-rata × 25 (sesuai PermenPANRB)
+        // Skala 1-4 dikonversi ke 25-100
+        $ikm = $average * IKMConstants::KONVERSI_IKM;
         
         return [
             'average' => round($average, 2),
@@ -46,7 +53,7 @@ class IKMStatsService
         foreach ($responses as $response) {
             $jawabans = $response->jawabans->pluck('nilai')->toArray();
             if (count($jawabans) === IKMConstants::UNSUUR_COUNT) {
-                $result = $this->calculateIKM($jawabans);  // ← PASTIKAN INI
+                $result = $this->calculateIKM($jawabans);
                 $totalIKM += $result['ikm'];
                 $count++;
             }

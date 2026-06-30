@@ -401,10 +401,14 @@ class DashboardStatsService
     {
         return $responses->sortByDesc('submitted_at')->take($limit)->map(function ($item) {
             $nilai = $item->jawabans->pluck('nilai')->toArray();
-            $ikm = count($nilai) === IKMConstants::UNSUUR_COUNT 
-                ? round((array_sum($nilai) / IKMConstants::UNSUUR_COUNT) 
-                    * (IKMConstants::IKM_MAX / IKMConstants::UNSUUR_COUNT), 2) 
-                : null;
+            
+            // ✅ PERBAIKAN: IKM = (Total/9) × 25
+            $ikm = null;
+            if (count($nilai) === IKMConstants::UNSUUR_COUNT) {
+                $average = array_sum($nilai) / IKMConstants::UNSUUR_COUNT;
+                $ikm = round($average * IKMConstants::KONVERSI_IKM, 2); // × 25
+            }
+            
             return [
                 'nama' => $item->responden->nama,
                 'usia' => $item->responden->usia,
@@ -426,10 +430,14 @@ class DashboardStatsService
     {
         return $responses->sortByDesc('submitted_at')->take($limit)->map(function ($item) {
             $nilai = $item->jawabans->pluck('nilai')->toArray();
-            $ikm = count($nilai) === IKMConstants::UNSUUR_COUNT 
-                ? round((array_sum($nilai) / IKMConstants::UNSUUR_COUNT) 
-                    * (IKMConstants::IKM_MAX / IKMConstants::UNSUUR_COUNT), 2) 
-                : null;
+            
+            // ✅ PERBAIKAN: IKM = (Total/9) × 25
+            $ikm = null;
+            if (count($nilai) === IKMConstants::UNSUUR_COUNT) {
+                $average = array_sum($nilai) / IKMConstants::UNSUUR_COUNT;
+                $ikm = round($average * IKMConstants::KONVERSI_IKM, 2); // × 25
+            }
+            
             return [
                 'nama' => $item->responden->nama,
                 'usia' => $item->responden->usia,
