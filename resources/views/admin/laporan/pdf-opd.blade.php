@@ -31,7 +31,9 @@
 
     <!-- Header -->
     <div class="header">
-        <h1>LAPORAN SURVEI KEPUASAN MASYARAKAT</h1>
+        <img src="{{ public_path('images/logo-sumenep-pdf.png') }}" alt="Logo Kabupaten Sumenep">
+        <h1>PEMERINTAH KABUPATEN SUMENEP</h1>
+        <h2>LAPORAN SURVEI KEPUASAN MASYARAKAT</h2>
         <h2>{{ $opd->nama_opd }}</h2>
         @if($periode)
             <p>Periode: {{ $periode->nama_periode }} ({{ $periode->tanggal_mulai->format('d/m/Y') }} - {{ $periode->tanggal_selesai->format('d/m/Y') }})</p>

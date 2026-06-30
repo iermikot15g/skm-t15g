@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin SKM Sumenep')</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -32,8 +39,14 @@
              class="fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto overflow-y-auto">
             
             <div class="flex items-center justify-center h-16 border-b border-gray-200">
-                <span class="text-xl font-bold text-blue-600">SKM Sumenep</span>
-                <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Admin</span>
+                {{-- Logo Sidebar --}}
+                <div class="flex items-center">
+                    <img src="{{ asset('images/logo-sumenep-sidebar.png') }}" 
+                         alt="Logo Kabupaten Sumenep" 
+                         class="h-10 w-10 object-contain mr-2">
+                    <span class="text-xl font-bold text-blue-600">SKM Sumenep</span>
+                    <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Admin</span>
+                </div>
             </div>
             
             <nav class="mt-6 px-4 pb-6">
